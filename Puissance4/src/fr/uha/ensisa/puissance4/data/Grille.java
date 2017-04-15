@@ -148,37 +148,137 @@ public class Grille {
 	}
 
 	/**
+	 * Fonction servant à renvoyer les coordonnées de la prochaine case dans la
+	 * même direction déterminée par les paramètres fournis.
+	 * 
+	 * @param colonneOriginale
+	 *            l'indice colonne de la case de départ.
+	 * @param ligneOriginale
+	 *            l'indice ligne de la case de départ.
+	 * @param colonne
+	 *            l'indice colonne de la case d'arrivée.
+	 * @param ligne
+	 *            l'indice ligne de la case d'arrivée.
+	 * @return Un tableau d'entiers représentant les coordonnées de la case qui
+	 *         nous intéresse.
+	 */
+	private Integer[] trouverLaDirection(int colonneOriginale, int ligneOriginale, int colonne, Integer ligne) {
+
+		// Nord
+		if (colonneOriginale == colonne && ligneOriginale > ligne) {
+			return new Integer[] { colonne, ligne - 1 };
+		}
+
+		// Nord-est
+		if (colonneOriginale < colonne && ligneOriginale > ligne) {
+			return new Integer[] { colonne + 1, ligne - 1 };
+		}
+
+		// Est
+		if (colonneOriginale < colonne && ligneOriginale == ligne) {
+			return new Integer[] { colonne + 1, ligne };
+		}
+
+		// Sud-est
+		if (colonneOriginale < colonne && ligneOriginale < ligne) {
+			return new Integer[] { colonne + 1, ligne + 1 };
+		}
+
+		// Sud
+		if (colonneOriginale == colonne && ligneOriginale < ligne) {
+			return new Integer[] { colonne, ligne + 1 };
+		}
+
+		// Sud-ouest
+		if (colonneOriginale > colonne && ligneOriginale < ligne) {
+			return new Integer[] { colonne - 1, ligne + 1 };
+		}
+
+		// Ouest
+		if (colonneOriginale > colonne && ligneOriginale == ligne) {
+			return new Integer[] { colonne - 1, ligne };
+		}
+
+		// Nord-ouest
+		if (colonneOriginale > colonne && ligneOriginale > ligne) {
+			return new Integer[] { colonne - 1, ligne - 1 };
+		}
+
+		// Aucune direction déterminée.
+		return null;
+	}
+
+	/**
 	 * Fonction servant à determiner si la case passée en paramètres se trouve à
 	 * côté de cases vides.
 	 * 
-	 * @param colonne
-	 *            l'indice colonne fournie.
-	 * @param ligne
-	 *            l'indice ligne fournie.
-	 * @return Un booléen indiquant si la case est bien à côté de cases vides,
-	 *         donc est extensible.
+	 * @param colonneOriginale
+	 *            l'indice colonne de la case de départ.
+	 * @param ligneOriginale
+	 *            l'indice ligne de la case de départ.
+	 * @return Un entier indiquant l'utilité de la case analysée.
 	 */
-	private boolean trouverCellulesVidesAutourDe(int colonne, int ligne) {
-		HashSet<Integer[]> options = new HashSet<Integer[]>();
-		options.add(new Integer[] { colonne - 1, ligne });
-		options.add(new Integer[] { colonne - 1, ligne - 1 });
-		options.add(new Integer[] { colonne, ligne - 1 });
-		options.add(new Integer[] { colonne + 1, ligne - 1 });
-		options.add(new Integer[] { colonne + 1, ligne });
-		options.add(new Integer[] { colonne + 1, ligne + 1 });
-		options.add(new Integer[] { colonne, ligne + 1 });
-		options.add(new Integer[] { colonne - 1, ligne + 1 });
+	private int trouverCellulesVidesAutourDe(int colonneOriginale, int ligneOriginale) {
 
-		for (Integer[] voisin : options) {
+		int succes = 1;
+		int echec = 0;
+
+		// Il faut trouver un alignement de 3 cases vides dans une direction
+		// quelconque partant de la case initiale. On va itérer sur les voisins
+		// afin de chercher des alignements potentiellement intéressants.
+		HashSet<Integer[]> pairesAValider = new HashSet<Integer[]>();
+		pairesAValider.add(new Integer[] { colonneOriginale - 1, ligneOriginale });
+		pairesAValider.add(new Integer[] { colonneOriginale - 1, ligneOriginale - 1 });
+		pairesAValider.add(new Integer[] { colonneOriginale, ligneOriginale - 1 });
+		pairesAValider.add(new Integer[] { colonneOriginale + 1, ligneOriginale - 1 });
+		pairesAValider.add(new Integer[] { colonneOriginale + 1, ligneOriginale });
+		pairesAValider.add(new Integer[] { colonneOriginale + 1, ligneOriginale + 1 });
+		pairesAValider.add(new Integer[] { colonneOriginale, ligneOriginale + 1 });
+		pairesAValider.add(new Integer[] { colonneOriginale - 1, ligneOriginale + 1 });
+
+		HashSet<Integer[]> tripletsAValider = new HashSet<Integer[]>();
+		HashSet<Integer[]> quadrupletsAValider = new HashSet<Integer[]>();
+
+		for (Integer[] voisin : pairesAValider) {
 			try {
 				if (grille[voisin[0]][voisin[1]] == Constantes.Case.V) {
-					return true;
+					tripletsAValider.add(trouverLaDirection(colonneOriginale, ligneOriginale, voisin[0], voisin[1]));
 				}
 			} catch (ArrayIndexOutOfBoundsException e) {
 				continue;
 			}
 		}
-		return false;
+
+		if (tripletsAValider.isEmpty()) {
+			return echec;
+		} else {
+			for (Integer[] paire : tripletsAValider) {
+				try {
+					if (grille[paire[0]][paire[1]] == Constantes.Case.V) {
+						quadrupletsAValider
+								.add(trouverLaDirection(colonneOriginale, ligneOriginale, paire[0], paire[1]));
+					}
+				} catch (ArrayIndexOutOfBoundsException e) {
+					continue;
+				}
+			}
+		}
+
+		if (quadrupletsAValider.isEmpty()) {
+			return echec;
+		} else {
+			for (Integer[] triplet : quadrupletsAValider) {
+				try {
+					if (grille[triplet[0]][triplet[1]] == Constantes.Case.V) {
+						return succes;
+					}
+				} catch (ArrayIndexOutOfBoundsException e) {
+					continue;
+				}
+			}
+			// Le cas où on n'a aucun quadruplet valide.
+			return echec;
+		}
 	}
 
 	/**
@@ -190,18 +290,18 @@ public class Grille {
 	 * @param colonneOriginale
 	 *            l'indice colonne de la case de départ
 	 * @param colonne
-	 *            l'indice colonne de la case d'arrivée.
+	 *            l'indice colonne après la dernière case du même symbole.
 	 * @param ligneOriginale
 	 *            l'indice ligne de la case de départ.
 	 * @param ligne
-	 *            l'indice ligne de la case d'arrivée.
+	 *            l'indice ligne après la dernière case du même symbole.
 	 * @param symboleJoueurCourant
 	 *            le symbole utilisé pour l'analyse.
 	 * @return Un entier renvoyant l'utilité de la paire.
 	 */
 	private int completerLaPaire(int colonneOriginale, int colonne, int ligneOriginale, int ligne,
 			Constantes.Case symboleJoueurCourant) {
-		
+
 		int succes = 2;
 		int echec = 0;
 
@@ -302,11 +402,95 @@ public class Grille {
 		}
 
 		// Direction sud-est
-		// TODO
-		if (ligneOriginale < ligne) {
-			if (Constantes.NB_COLONNES - colonneOriginale == Constantes.NB_COLONNES
-					|| Constantes.NB_LIGNES - ligneOriginale == Constantes.NB_LIGNES) {
-				// TODO
+		if (colonneOriginale < colonne) {
+
+			if (colonneOriginale > 0 && ligneOriginale > 0) {
+				// Ne pas chercher à analyser ce qui fait déjà partie d'un
+				// triplet.
+				if (grille[colonneOriginale - 1][ligneOriginale - 1] == symboleJoueurCourant) {
+					return echec;
+				}
+			}
+
+			// Début de l'analyse propre.
+			// Peut remonter au moins 2 fois vers le nord-ouest.
+			if (colonneOriginale > 1 && ligneOriginale > 1) {
+				if (grille[colonneOriginale - 1][ligneOriginale - 1] == Constantes.Case.V) {
+					if (grille[colonneOriginale - 2][ligneOriginale - 2] == Constantes.Case.V) {
+						return succes;
+					} else {
+						if (colonne < Constantes.NB_COLONNES && ligne < Constantes.NB_LIGNES) {
+							if (grille[colonne][ligne] == Constantes.Case.V) {
+								return succes;
+							} else {
+								return echec;
+							}
+						} else {
+							return echec;
+						}
+					}
+				} else {
+					if (colonne < Constantes.NB_COLONNES - 1 && ligne < Constantes.NB_LIGNES - 1) {
+						if (grille[colonne][ligne] == Constantes.Case.V) {
+							if (grille[colonne + 1][ligne + 1] == Constantes.Case.V) {
+								return succes;
+							} else {
+								return echec;
+							}
+						} else {
+							return echec;
+						}
+					} else {
+						return echec;
+					}
+				}
+			} else {
+				// On sait alors que l'on peut remonter une seule fois vers le
+				// nord-ouest.
+				if (colonneOriginale > 0 && ligneOriginale > 0) {
+					if (grille[colonneOriginale - 1][ligneOriginale - 1] == Constantes.Case.V) {
+						// Vérifier si de l'autre côté c'est bon.
+						if (colonne < Constantes.NB_COLONNES && ligne < Constantes.NB_LIGNES) {
+							if (grille[colonne][ligne] == Constantes.Case.V) {
+								return succes;
+							} else {
+								return echec;
+							}
+						} else {
+							return echec;
+						}
+					} else {
+						// On doit descendre au moins deux fois vers le
+						// sud-est.
+						if (colonne < Constantes.NB_COLONNES - 1 && ligne < Constantes.NB_LIGNES - 1) {
+							if (grille[colonne][ligne] == Constantes.Case.V) {
+								if (grille[colonne + 1][ligne + 1] == Constantes.Case.V) {
+									return succes;
+								} else {
+									return echec;
+								}
+							} else {
+								return echec;
+							}
+						} else {
+							return echec;
+						}
+					}
+				} else {
+					// On est sur un des murs nord ou ouest. Dans ce cas on est
+					// sûr d'avoir assez de cases à analyser puisque elles sont
+					// filtrées en amont (cf determinerTypeDeCluster()). On doit
+					// descendre vers le sud-est.
+					if (grille[colonne][ligne] == Constantes.Case.V) {
+						if (grille[colonne + 1][ligne + 1] == Constantes.Case.V) {
+							return succes;
+						} else {
+							return echec;
+						}
+					} else {
+						return echec;
+					}
+				}
 			}
 		}
 
@@ -407,43 +591,122 @@ public class Grille {
 		}
 
 		// Direction sud-ouest
-		// TODO
-		/*
-		 * if (colonneOriginale > colonne) { switch (Constantes.NB_LIGNES -
-		 * ligneOriginale) { case 2: // Paire pleine au sud-ouest if
-		 * (grille[colonneOriginale + 1][ligneOriginale - 1] ==
-		 * Constantes.Case.V) { if (grille[colonneOriginale + 2][ligneOriginale
-		 * - 2] == Constantes.Case.V) { return 2; } else { return 0; } } else {
-		 * return 0; } case 3: // Paire à une case du coin sud-ouest if
-		 * (grille[colonne][ligne] == Constantes.Case.V) { if
-		 * (grille[colonneOriginale + 1][ligneOriginale - 1] ==
-		 * Constantes.Case.V) { return 2; } else { return 0; } } else { if
-		 * (grille[colonneOriginale + 1][ligneOriginale - 1] ==
-		 * Constantes.Case.V) { if (grille[colonneOriginale + 2][ligneOriginale
-		 * - 2] == Constantes.Case.V) { return 2; } else { return 0; } } else {
-		 * return 0; } } case Constantes.NB_COLONNES - 1: // Paire à une case du
-		 * coin nord-est if (grille[colonneOriginale + 1][ligneOriginale - 1] ==
-		 * Constantes.Case.V) { if (grille[colonne][ligne] == Constantes.Case.V)
-		 * { return 2; } else { return 0; } } else { if (grille[colonne][ligne]
-		 * == Constantes.Case.V) { if (grille[colonne - 1][ligne + 1] ==
-		 * Constantes.Case.V) { return 2; } else { return 0; } } else { return
-		 * 0; } } case Constantes.NB_COLONNES: // Paire dans le coin nord-est if
-		 * (grille[colonne][ligne] == Constantes.Case.V) { if (grille[colonne -
-		 * 1][ligne + 1] == Constantes.Case.V) { return 2; } else { return 0; }
-		 * } else { return 0; } default: if (grille[colonneOriginale +
-		 * 1][ligneOriginale - 1] == Constantes.Case.V) { if
-		 * (grille[colonneOriginale + 2][ligneOriginale - 2] ==
-		 * Constantes.Case.V) { return 2; } else { if (grille[colonne][ligne] ==
-		 * Constantes.Case.V) { return 2; } else { return 0; } } } else { if
-		 * (grille[colonne][ligne] == Constantes.Case.V) { if (grille[colonne -
-		 * 1][ligne + 1] == Constantes.Case.V) { return 2; } else { return 0; }
-		 * } else { return 0; } } }
-		 * 
-		 * }
-		 */
-		return 0;
+		if (colonneOriginale > colonne) {
+
+			if (colonneOriginale < Constantes.NB_COLONNES - 1 && ligneOriginale > 0) {
+				// Ne pas chercher à analyser ce qui fait déjà partie d'un
+				// triplet.
+				if (grille[colonneOriginale + 1][ligneOriginale - 1] == symboleJoueurCourant) {
+					return echec;
+				}
+			}
+
+			// Début de l'analyse propre.
+			// Peut remonter au moins 2 fois vers le nord-est.
+			if (colonneOriginale < Constantes.NB_COLONNES - 2 && ligneOriginale > 1) {
+				if (grille[colonneOriginale + 1][ligneOriginale - 1] == Constantes.Case.V) {
+					if (grille[colonneOriginale + 2][ligneOriginale - 2] == Constantes.Case.V) {
+						return succes;
+					} else {
+						if (colonne >= 0 && ligne < Constantes.NB_LIGNES) {
+							if (grille[colonne][ligne] == Constantes.Case.V) {
+								return succes;
+							} else {
+								return echec;
+							}
+						} else {
+							return echec;
+						}
+					}
+				} else {
+					// On doit descendre vers le sud-ouest.
+					if (colonne > 0 && ligne < Constantes.NB_LIGNES - 1) {
+						if (grille[colonne][ligne] == Constantes.Case.V) {
+							if (grille[colonne - 1][ligne + 1] == Constantes.Case.V) {
+								return succes;
+							} else {
+								return echec;
+							}
+						} else {
+							return echec;
+						}
+					} else {
+						return echec;
+					}
+				}
+			} else {
+				// On sait alors que l'on peut remonter une seule fois vers le
+				// nord-est.
+				if (colonneOriginale < Constantes.NB_COLONNES - 1 && ligneOriginale > 0) {
+					if (grille[colonneOriginale + 1][ligneOriginale - 1] == Constantes.Case.V) {
+						// Vérifier si de l'autre côté c'est bon.
+						if (colonne >= 0 && ligne < Constantes.NB_LIGNES) {
+							if (grille[colonne][ligne] == Constantes.Case.V) {
+								return succes;
+							} else {
+								return echec;
+							}
+						} else {
+							return echec;
+						}
+					} else {
+						// On doit descendre au moins deux fois vers le
+						// sud-ouest.
+						if (colonne > 1 && ligne < Constantes.NB_LIGNES - 1) {
+							if (grille[colonne][ligne] == Constantes.Case.V) {
+								if (grille[colonne - 1][ligne + 1] == Constantes.Case.V) {
+									return succes;
+								} else {
+									return echec;
+								}
+							} else {
+								return echec;
+							}
+						} else {
+							return echec;
+						}
+					}
+				} else {
+					// On est sur un des murs sud ou est. Dans ce cas on est
+					// sûr d'avoir assez de cases à analyser puisque elles sont
+					// filtrées en amont (cf determinerTypeDeCluster()). On doit
+					// descendre vers le sud-est.
+					if (grille[colonne][ligne] == Constantes.Case.V) {
+						if (grille[colonne + 1][ligne - 1] == Constantes.Case.V) {
+							return succes;
+						} else {
+							return echec;
+						}
+					} else {
+						return echec;
+					}
+				}
+			}
+		}
+
+		// Aucune direction d'étude n'a été trouvée. Dans ce cas on renvoît un
+		// echec.
+		return echec;
 	}
 
+	/**
+	 * Fonction servant à indiquer si le triplet peut être complété est donc
+	 * rendu utile.
+	 * 
+	 * @param colonneOriginale
+	 *            l'indice colonne de la case de départ.
+	 * @param colonne
+	 *            l'indice colonne de la case se situant après la dernière case
+	 *            du même symbole.
+	 * @param ligneOriginale
+	 *            l'indice ligne de la case de départ.
+	 * @param ligne
+	 *            l'indice ligne de la case se situant après la dernière case du
+	 *            même symbole.
+	 * @param symboleJoueurCourant
+	 *            le symbole utilisé pour l'analyse.
+	 * @return un entier indiquant l'utilité du triplet.
+	 */
 	private int completerLeTriplet(int colonneOriginale, int colonne, int ligneOriginale, int ligne,
 			Case symboleJoueurCourant) {
 
@@ -452,7 +715,7 @@ public class Grille {
 
 		// Direction est
 		if (ligneOriginale == ligne) {
-			if (colonneOriginale > echec) {
+			if (colonneOriginale > 0) {
 				if (grille[colonneOriginale - 1][ligneOriginale] == Constantes.Case.V) {
 					return succes;
 				} else {
@@ -475,9 +738,38 @@ public class Grille {
 			}
 		}
 
+		// Direction sud-est (certaines cases ont déjà été filtrées. Cf
+		// determinerTypeDeCluster())
+		if (colonneOriginale < colonne) {
+			// Cas où on peut remonter vers le nord-ouest
+			if (colonneOriginale > 0 && ligneOriginale > 0) {
+				if (grille[colonneOriginale - 1][ligneOriginale - 1] == Constantes.Case.V) {
+					return succes;
+				} else {
+					// Cas où on doit descendre vers le sud-est
+					if (colonne < Constantes.NB_COLONNES && ligne < Constantes.NB_LIGNES) {
+						if (grille[colonne][ligne] == Constantes.Case.V) {
+							return succes;
+						} else {
+							return echec;
+						}
+					} else {
+						return echec;
+					}
+				}
+			} else {
+				// Cas où on doit descendre vers le sud-est
+				if (grille[colonne][ligne] == Constantes.Case.V) {
+					return succes;
+				} else {
+					return echec;
+				}
+			}
+		}
+
 		// Direction sud
 		if (colonneOriginale == colonne) {
-			if (ligneOriginale > echec) {
+			if (ligneOriginale > 0) {
 				if (grille[ligneOriginale - 1][colonneOriginale] == Constantes.Case.V) {
 					return succes;
 				} else {
@@ -499,6 +791,33 @@ public class Grille {
 				}
 			}
 		}
+
+		// Direction sud-ouest (certaines cases ont déjà été filtrées. Cf
+		// determinerTypeDeCluster())
+		if (colonneOriginale > colonne) {
+			if (colonne >= 0 && ligne < Constantes.NB_LIGNES) {
+				if (grille[colonne][ligne] == Constantes.Case.V) {
+					return succes;
+				} else {
+					if (colonneOriginale < Constantes.NB_COLONNES - 1 && ligneOriginale > 0) {
+						if (grille[colonneOriginale + 1][ligneOriginale - 1] == Constantes.Case.V) {
+							return succes;
+						} else {
+							return echec;
+						}
+					} else {
+						return echec;
+					}
+				}
+			} else {
+				if (grille[colonneOriginale + 1][ligneOriginale - 1] == Constantes.Case.V) {
+					return succes;
+				} else {
+					return echec;
+				}
+			}
+		}
+
 		return echec;
 	}
 
@@ -514,9 +833,9 @@ public class Grille {
 	 * @return un entier renvoyant l'utilité de la grille.
 	 */
 	private int determinerTypeDeCluster(int colonne, int ligne, Constantes.Case symboleJoueurCourant) {
-		
+
 		int utilitePossible;
-		
+
 		int nbAlignes = 0;
 		int colonneOriginale = colonne;
 		int ligneOriginale = ligne;
@@ -534,8 +853,7 @@ public class Grille {
 		// switch case pour est
 		switch (nbAlignes) {
 		case 2:
-			utilitePossible = completerLaPaire(colonneOriginale, colonne, ligneOriginale, ligne,
-					symboleJoueurCourant);
+			utilitePossible = completerLaPaire(colonneOriginale, colonne, ligneOriginale, ligne, symboleJoueurCourant);
 			if (utilitePossible == 2) {
 				utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
 				// Mettre l'utilité à minimum 2 pour la première paire
@@ -577,25 +895,33 @@ public class Grille {
 		// switch case pour sud-est
 		switch (nbAlignes) {
 		case 2:
+			// Eliminer les cas où la paire se trouve dans une zone où on ne
+			// peut pas gagner.
 			if (!Constantes.pairesInutilesSE.contains(new Integer[] { colonneOriginale, ligneOriginale })) {
 				utilitePossible = completerLaPaire(colonneOriginale, colonne, ligneOriginale, ligne,
 						symboleJoueurCourant);
-				utilite = utilitePossible > utilite ? utilitePossible : utilite;
+				if (utilitePossible == 2) {
+					utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
+					// Mettre l'utilité à minimum 2 pour la première paire
+					// dévouverte.
+					if (utilite < 2) {
+						utilite = 2;
+					}
+				}
 			}
 			break;
 		case 3:
+			// Eliminer les cas où le triplet se trouve dans une zone où on ne
+			// peut pas gagner.
 			if (!Constantes.tripletsInutilesSE.contains(new Integer[] { colonneOriginale, ligneOriginale })) {
-				// Tester pour voir si la case au nord-ouest du cluster est
-				// vide.
-				if (colonneOriginale > 0 && ligneOriginale > 0) {
-					if (grille[colonneOriginale - 1][ligneOriginale - 1] == Constantes.Case.V) {
-						utilite = 3 > utilite ? 3 : utilite;
-					}
-				}
-				// Tester pour voir si la case au sud-est du cluster est vide.
-				if (colonne < Constantes.NB_COLONNES && ligne < Constantes.NB_LIGNES) {
-					if (grille[colonne][ligne] == Constantes.Case.V) {
-						utilite = 3 > utilite ? 3 : utilite;
+				utilitePossible = completerLeTriplet(colonneOriginale, colonne, ligneOriginale, ligne,
+						symboleJoueurCourant);
+				if (utilitePossible == 3) {
+					utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
+					// Mettre l'utilité à minimum 3 pour le premier triplet
+					// découvert.
+					if (utilite < 3) {
+						utilite = 3;
 					}
 				}
 			}
@@ -618,21 +944,25 @@ public class Grille {
 		// switch case pour sud
 		switch (nbAlignes) {
 		case 2:
-			utilitePossible = completerLaPaire(colonneOriginale, colonne, ligneOriginale, ligne,
-					symboleJoueurCourant);
-			utilite = utilitePossible > utilite ? utilitePossible : utilite;
-			break;
-		case 3:
-			// Tester pour voir si la case au nord du cluster est vide.
-			if (ligneOriginale > 0) {
-				if (grille[colonneOriginale][ligneOriginale - 1] == Constantes.Case.V) {
-					utilite = 3 > utilite ? 3 : utilite;
+			utilitePossible = completerLaPaire(colonneOriginale, colonne, ligneOriginale, ligne, symboleJoueurCourant);
+			if (utilitePossible == 2) {
+				utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
+				// Mettre l'utilité à minimum 2 pour la première paire
+				// dévouverte.
+				if (utilite < 2) {
+					utilite = 2;
 				}
 			}
-			// Tester pour voir si la case au sud du cluster est vide.
-			if (ligne < Constantes.NB_LIGNES) {
-				if (grille[colonne][ligne] == Constantes.Case.V) {
-					utilite = 3 > utilite ? 3 : utilite;
+			break;
+		case 3:
+			utilitePossible = completerLeTriplet(colonneOriginale, colonne, ligneOriginale, ligne,
+					symboleJoueurCourant);
+			if (utilitePossible == 3) {
+				utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
+				// Mettre l'utilité à minimum 3 pour le premier triplet
+				// découvert.
+				if (utilite < 3) {
+					utilite = 3;
 				}
 			}
 			break;
@@ -644,49 +974,65 @@ public class Grille {
 		ligne = ligneOriginale;
 		nbAlignes = 0;
 
-		if (!Constantes.pairesInutilesSO.contains(new Integer[] { colonneOriginale, ligneOriginale })) {
+		while (colonne >= 0 && ligne < Constantes.NB_LIGNES && nbAlignes < 4
+				&& grille[colonne][ligne] == symboleJoueurCourant) {
+			nbAlignes++;
+			ligne++;
+			colonne--;
+		}
 
-			while (colonne >= 0 && ligne < Constantes.NB_LIGNES && nbAlignes < 4
-					&& grille[colonne][ligne] == symboleJoueurCourant) {
-				nbAlignes++;
-				ligne++;
-				colonne--;
-			}
+		if (nbAlignes == 4) {
+			return 4;
+		}
 
-			if (nbAlignes == 4) {
-				return 4;
-			}
-
-			// switch case pour sud-ouest
-			switch (nbAlignes) {
-			case 1:
-				if (trouverCellulesVidesAutourDe(colonneOriginale, ligne)) {
-					utilite = 1 > utilite ? 1 : utilite;
+		// switch case pour sud-ouest
+		switch (nbAlignes) {
+		// C'est le seul cas où on s'intéresse à un seul symbole aligné. On est
+		// sûr que toutes les autres directions ont été explorés et donc que la
+		// case est vraiment seule.
+		case 1:
+			utilitePossible = trouverCellulesVidesAutourDe(colonneOriginale, ligneOriginale);
+			if (utilitePossible == 1) {
+				utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
+				// Mettre l'utilité à minimum 1 pour la première paire
+				// dévouverte.
+				if (utilite < 1) {
+					utilite = 1;
 				}
-				break;
-			case 2:
+			}
+			break;
+		case 2:
+			if (!Constantes.pairesInutilesSO.contains(new Integer[] { colonneOriginale, ligneOriginale })) {
 				utilitePossible = completerLaPaire(colonneOriginale, colonne, ligneOriginale, ligne,
 						symboleJoueurCourant);
-				utilite = utilitePossible > utilite ? utilitePossible : utilite;
-				break;
-			case 3:
-				// Tester pour voir si la case au nord-est du cluster est vide.
-				if (colonneOriginale < Constantes.NB_COLONNES - 1 && ligneOriginale > 0) {
-					if (grille[colonneOriginale + 1][ligneOriginale - 1] == Constantes.Case.V) {
-						utilite = 3 > utilite ? 3 : utilite;
+				if (utilitePossible == 2) {
+					utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
+					// Mettre l'utilité à minimum 2 pour la première paire
+					// dévouverte.
+					if (utilite < 2) {
+						utilite = 2;
 					}
 				}
-				// Tester pour voir si la case au sud-ouest du cluster est vide.
-				if (colonne >= 0 && ligne < Constantes.NB_LIGNES) {
-					if (grille[colonne][ligne] == Constantes.Case.V) {
-						utilite = 3 > utilite ? 3 : utilite;
-					}
-				}
-				break;
 			}
+			break;
+		case 3:
+			if (!Constantes.tripletsInutilesSO.contains(new Integer[] { colonneOriginale, ligneOriginale })) {
+				utilitePossible = completerLaPaire(colonneOriginale, colonne, ligneOriginale, ligne,
+						symboleJoueurCourant);
+				if (utilitePossible == 3) {
+					utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
+					// Mettre l'utilité à minimum 2 pour le premier triplet
+					// dévouvert.
+					if (utilite < 3) {
+						utilite = 3;
+					}
+				}
+			}
+			break;
 		}
 
 		return 0;
+
 	}
 
 	/**
@@ -696,15 +1042,15 @@ public class Grille {
 	 * @return
 	 */
 	public double evaluer(Case symboleJoueurCourant) {
-		
+
 		// Joueur 1 cherche à maximiser ses chances à gagner
 		// Joueur 2 cherche à minimiser les chances que max gagne
-		
+
 		if (symboleJoueurCourant == Constantes.SYMBOLE_J1) {
-			for (int i = 0; i < Constantes.NB_LIGNES; i++) {
-				for (int j = 0; j < Constantes.NB_COLONNES; j++) {
-					if (grille[j][i] == Constantes.SYMBOLE_J1) {
-						determinerTypeDeCluster(j, i, Constantes.SYMBOLE_J1);
+			for (int ligne = 0; ligne < Constantes.NB_LIGNES; ligne++) {
+				for (int colonne = 0; colonne < Constantes.NB_COLONNES; colonne++) {
+					if (grille[colonne][ligne] == Constantes.SYMBOLE_J1) {
+						determinerTypeDeCluster(colonne, ligne, Constantes.SYMBOLE_J1);
 					}
 				}
 			}

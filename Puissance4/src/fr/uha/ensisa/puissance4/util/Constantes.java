@@ -112,4 +112,8 @@ public abstract class Constantes {
 		return tripletsInutilesSO;
 	}
 	
+	public static enum Directions {
+		EST, SUDEST, SUD, SUDOUEST
+	}
+	
 }

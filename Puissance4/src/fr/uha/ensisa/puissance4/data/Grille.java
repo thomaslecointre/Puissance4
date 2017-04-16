@@ -19,16 +19,17 @@ public class Grille {
 	}
 
 	/**
-	 * Constructeur qui crÃ©Ã© une copie de la grille donnÃ© en argument
+	 * Constructeur qui crée une copie de la grille donnée en argument
 	 * 
 	 * @param original
 	 */
 	private Grille(Grille original) {
-		// Ã€ complÃ©ter
+		this.grille = original.grille;
+		this.utilite = original.utilite;
 	}
 
 	/**
-	 * Renvoie le contenu de la case aux coordonnÃ©es donnÃ©es en argument
+	 * Renvoie le contenu de la case aux coordonnées données en argument
 	 * 
 	 * @param ligne
 	 * @param colonne
@@ -218,29 +219,46 @@ public class Grille {
 	 *            l'indice ligne de la case de départ.
 	 * @return Un entier indiquant l'utilité de la case analysée.
 	 */
-	private int trouverCellulesVidesAutourDe(int colonneOriginale, int ligneOriginale) {
+	private int trouverCellulesVidesAutourDe(int colonneOriginale, int ligneOriginale,
+			Constantes.Directions direction, Constantes.Case symboleJoueurCourant) {
 
 		int succes = 1;
 		int echec = 0;
+		int nbCasesSymboleJoueur = 0;
 
-		// Il faut trouver un alignement de 3 cases vides dans une direction
+		// Il faut trouver un alignement de 3 cases contenant soit du vide, soit
+		// une appartenant au joueur courant dans une direction
 		// quelconque partant de la case initiale. On va itérer sur les voisins
 		// afin de chercher des alignements potentiellement intéressants.
 		HashSet<Integer[]> pairesAValider = new HashSet<Integer[]>();
-		pairesAValider.add(new Integer[] { colonneOriginale - 1, ligneOriginale });
-		pairesAValider.add(new Integer[] { colonneOriginale - 1, ligneOriginale - 1 });
-		pairesAValider.add(new Integer[] { colonneOriginale, ligneOriginale - 1 });
-		pairesAValider.add(new Integer[] { colonneOriginale + 1, ligneOriginale - 1 });
-		pairesAValider.add(new Integer[] { colonneOriginale + 1, ligneOriginale });
-		pairesAValider.add(new Integer[] { colonneOriginale + 1, ligneOriginale + 1 });
-		pairesAValider.add(new Integer[] { colonneOriginale, ligneOriginale + 1 });
-		pairesAValider.add(new Integer[] { colonneOriginale - 1, ligneOriginale + 1 });
+		switch (direction) {
+		case EST:
+			pairesAValider.add(new Integer[] { colonneOriginale - 1, ligneOriginale });
+			pairesAValider.add(new Integer[] { colonneOriginale + 1, ligneOriginale });
+			break;
+		case SUDEST:
+			pairesAValider.add(new Integer[] { colonneOriginale - 1, ligneOriginale - 1 });
+			pairesAValider.add(new Integer[] { colonneOriginale + 1, ligneOriginale + 1 });
+			break;
+		case SUD:
+			pairesAValider.add(new Integer[] { colonneOriginale, ligneOriginale - 1 });
+			pairesAValider.add(new Integer[] { colonneOriginale, ligneOriginale + 1 });
+			break;
+		case SUDOUEST:
+			pairesAValider.add(new Integer[] { colonneOriginale + 1, ligneOriginale - 1 });
+			pairesAValider.add(new Integer[] { colonneOriginale - 1, ligneOriginale + 1 });
+			break;
+		default:
+			// La direction fournie n'est pas reconnue
+			return echec;
+		}
 
 		HashSet<Integer[]> tripletsAValider = new HashSet<Integer[]>();
 		HashSet<Integer[]> quadrupletsAValider = new HashSet<Integer[]>();
 
 		for (Integer[] voisin : pairesAValider) {
 			try {
+				// Comme l'alignement détérminé précedemment est de 1, on cherche seulement les cases vides autour selon la direction fournie.
 				if (grille[voisin[0]][voisin[1]] == Constantes.Case.V) {
 					tripletsAValider.add(trouverLaDirection(colonneOriginale, ligneOriginale, voisin[0], voisin[1]));
 				}
@@ -254,9 +272,12 @@ public class Grille {
 		} else {
 			for (Integer[] paire : tripletsAValider) {
 				try {
-					if (grille[paire[0]][paire[1]] == Constantes.Case.V) {
+					if (grille[paire[0]][paire[1]] == Constantes.Case.V || grille[paire[0]][paire[1]] == symboleJoueurCourant) {
 						quadrupletsAValider
 								.add(trouverLaDirection(colonneOriginale, ligneOriginale, paire[0], paire[1]));
+						if(grille[paire[0]][paire[1]] == symboleJoueurCourant) {
+							nbCasesSymboleJoueur++;
+						}
 					}
 				} catch (ArrayIndexOutOfBoundsException e) {
 					continue;
@@ -269,8 +290,11 @@ public class Grille {
 		} else {
 			for (Integer[] triplet : quadrupletsAValider) {
 				try {
-					if (grille[triplet[0]][triplet[1]] == Constantes.Case.V) {
-						return succes;
+					if (grille[triplet[0]][triplet[1]] == Constantes.Case.V || grille[triplet[0]][triplet[1]] == symboleJoueurCourant) {
+						if(grille[triplet[0]][triplet[1]] == symboleJoueurCourant) {
+							nbCasesSymboleJoueur++;
+						}
+						return succes + nbCasesSymboleJoueur;
 					}
 				} catch (ArrayIndexOutOfBoundsException e) {
 					continue;
@@ -302,7 +326,10 @@ public class Grille {
 	private int completerLaPaire(int colonneOriginale, int colonne, int ligneOriginale, int ligne,
 			Constantes.Case symboleJoueurCourant) {
 
-		int succes = 2;
+		int succes = 2; // Si le quatrième symbole est identique au
+						// symboleJoueurCourant on a effectivement un triplet
+						// mais séparé par une case vide. Il convient d'élever
+						// l'utilité à celle d'un triplet (return succes + 1;).
 		int echec = 0;
 
 		// Direction est
@@ -321,6 +348,8 @@ public class Grille {
 				if (grille[colonneOriginale - 1][ligneOriginale] == Constantes.Case.V) {
 					if (grille[colonneOriginale - 2][ligneOriginale] == Constantes.Case.V) {
 						return succes;
+					} else if (grille[colonneOriginale - 2][ligneOriginale] == symboleJoueurCourant) {
+						return succes + 1;
 					} else {
 						return echec;
 					}
@@ -332,6 +361,8 @@ public class Grille {
 				if (grille[colonne][ligne] == Constantes.Case.V) {
 					if (grille[colonneOriginale - 1][ligneOriginale] == Constantes.Case.V) {
 						return succes;
+					} else if (grille[colonneOriginale - 1][ligneOriginale] == symboleJoueurCourant) {
+						return succes + 1;
 					} else {
 						return echec;
 					}
@@ -339,6 +370,8 @@ public class Grille {
 					if (grille[colonneOriginale - 1][ligneOriginale] == Constantes.Case.V) {
 						if (grille[colonneOriginale - 2][ligneOriginale] == Constantes.Case.V) {
 							return succes;
+						} else if (grille[colonneOriginale - 2][ligneOriginale] == symboleJoueurCourant) {
+							return succes + 1;
 						} else {
 							return echec;
 						}
@@ -358,6 +391,8 @@ public class Grille {
 					if (grille[colonne][ligne] == Constantes.Case.V) {
 						if (grille[colonne + 1][ligne] == Constantes.Case.V) {
 							return succes;
+						} else if (grille[colonne + 1][ligne] == symboleJoueurCourant) {
+							return succes + 1;
 						} else {
 							return echec;
 						}
@@ -370,6 +405,8 @@ public class Grille {
 				if (grille[colonne][ligne] == Constantes.Case.V) {
 					if (grille[colonne + 1][ligne] == Constantes.Case.V) {
 						return succes;
+					} else if (grille[colonne + 1][ligne] == symboleJoueurCourant) {
+						return succes + 1;
 					} else {
 						return echec;
 					}
@@ -380,6 +417,8 @@ public class Grille {
 				if (grille[colonneOriginale - 1][ligneOriginale] == Constantes.Case.V) {
 					if (grille[colonneOriginale - 2][ligneOriginale] == Constantes.Case.V) {
 						return succes;
+					} else if (grille[colonneOriginale - 2][ligneOriginale] == symboleJoueurCourant) {
+						return succes + 1;
 					} else {
 						if (grille[colonne][ligne] == Constantes.Case.V) {
 							return succes;
@@ -391,6 +430,8 @@ public class Grille {
 					if (grille[colonne][ligne] == Constantes.Case.V) {
 						if (grille[colonne + 1][ligne] == Constantes.Case.V) {
 							return succes;
+						} else if (grille[colonne + 1][ligne] == symboleJoueurCourant) {
+							return succes + 1;
 						} else {
 							return echec;
 						}
@@ -418,6 +459,8 @@ public class Grille {
 				if (grille[colonneOriginale - 1][ligneOriginale - 1] == Constantes.Case.V) {
 					if (grille[colonneOriginale - 2][ligneOriginale - 2] == Constantes.Case.V) {
 						return succes;
+					} else if (grille[colonneOriginale - 2][ligneOriginale - 2] == symboleJoueurCourant) {
+						return succes + 1;
 					} else {
 						if (colonne < Constantes.NB_COLONNES && ligne < Constantes.NB_LIGNES) {
 							if (grille[colonne][ligne] == Constantes.Case.V) {
@@ -434,6 +477,8 @@ public class Grille {
 						if (grille[colonne][ligne] == Constantes.Case.V) {
 							if (grille[colonne + 1][ligne + 1] == Constantes.Case.V) {
 								return succes;
+							} else if (grille[colonne + 1][ligne + 1] == symboleJoueurCourant) {
+								return succes + 1;
 							} else {
 								return echec;
 							}
@@ -466,6 +511,8 @@ public class Grille {
 							if (grille[colonne][ligne] == Constantes.Case.V) {
 								if (grille[colonne + 1][ligne + 1] == Constantes.Case.V) {
 									return succes;
+								} else if (grille[colonne + 1][ligne + 1] == symboleJoueurCourant) {
+									return succes + 1;
 								} else {
 									return echec;
 								}
@@ -484,6 +531,8 @@ public class Grille {
 					if (grille[colonne][ligne] == Constantes.Case.V) {
 						if (grille[colonne + 1][ligne + 1] == Constantes.Case.V) {
 							return succes;
+						} else if (grille[colonne + 1][ligne + 1] == symboleJoueurCourant) {
+							return succes + 1;
 						} else {
 							return echec;
 						}
@@ -510,6 +559,8 @@ public class Grille {
 				if (grille[colonneOriginale][ligneOriginale - 1] == Constantes.Case.V) {
 					if (grille[colonneOriginale][ligneOriginale - 2] == Constantes.Case.V) {
 						return succes;
+					} else if (grille[colonneOriginale][ligneOriginale - 2] == symboleJoueurCourant) {
+						return succes + 1;
 					} else {
 						return echec;
 					}
@@ -528,6 +579,8 @@ public class Grille {
 					if (grille[colonneOriginale][ligneOriginale - 1] == Constantes.Case.V) {
 						if (grille[colonneOriginale][ligneOriginale - 2] == Constantes.Case.V) {
 							return succes;
+						} else if (grille[colonneOriginale][ligneOriginale - 2] == symboleJoueurCourant) {
+							return succes + 1;
 						} else {
 							return echec;
 						}
@@ -547,6 +600,8 @@ public class Grille {
 					if (grille[colonne][ligne] == Constantes.Case.V) {
 						if (grille[colonne][ligne + 1] == Constantes.Case.V) {
 							return succes;
+						} else if (grille[colonne][ligne + 1] == symboleJoueurCourant) {
+							return succes + 1;
 						} else {
 							return echec;
 						}
@@ -559,6 +614,8 @@ public class Grille {
 				if (grille[colonne][ligne] == Constantes.Case.V) {
 					if (grille[colonne][ligne + 1] == Constantes.Case.V) {
 						return succes;
+					} else if (grille[colonne][ligne + 1] == symboleJoueurCourant) {
+						return succes + 1;
 					} else {
 						return echec;
 					}
@@ -569,6 +626,8 @@ public class Grille {
 				if (grille[colonneOriginale][ligneOriginale - 1] == Constantes.Case.V) {
 					if (grille[colonneOriginale][ligneOriginale - 2] == Constantes.Case.V) {
 						return succes;
+					} else if (grille[colonneOriginale][ligneOriginale - 2] == symboleJoueurCourant) {
+						return succes + 1;
 					} else {
 						if (grille[colonne][ligne] == Constantes.Case.V) {
 							return succes;
@@ -580,6 +639,8 @@ public class Grille {
 					if (grille[colonne][ligne] == Constantes.Case.V) {
 						if (grille[colonne][ligne + 1] == Constantes.Case.V) {
 							return succes;
+						} else if (grille[colonne][ligne + 1] == symboleJoueurCourant) {
+							return succes + 1;
 						} else {
 							return echec;
 						}
@@ -607,6 +668,8 @@ public class Grille {
 				if (grille[colonneOriginale + 1][ligneOriginale - 1] == Constantes.Case.V) {
 					if (grille[colonneOriginale + 2][ligneOriginale - 2] == Constantes.Case.V) {
 						return succes;
+					} else if (grille[colonneOriginale + 2][ligneOriginale - 2] == symboleJoueurCourant) {
+						return succes + 1;
 					} else {
 						if (colonne >= 0 && ligne < Constantes.NB_LIGNES) {
 							if (grille[colonne][ligne] == Constantes.Case.V) {
@@ -624,6 +687,8 @@ public class Grille {
 						if (grille[colonne][ligne] == Constantes.Case.V) {
 							if (grille[colonne - 1][ligne + 1] == Constantes.Case.V) {
 								return succes;
+							} else if (grille[colonne - 1][ligne + 1] == symboleJoueurCourant) {
+								return succes + 1;
 							} else {
 								return echec;
 							}
@@ -656,6 +721,8 @@ public class Grille {
 							if (grille[colonne][ligne] == Constantes.Case.V) {
 								if (grille[colonne - 1][ligne + 1] == Constantes.Case.V) {
 									return succes;
+								} else if (grille[colonne - 1][ligne + 1] == symboleJoueurCourant) {
+									return succes + 1;
 								} else {
 									return echec;
 								}
@@ -674,6 +741,8 @@ public class Grille {
 					if (grille[colonne][ligne] == Constantes.Case.V) {
 						if (grille[colonne + 1][ligne - 1] == Constantes.Case.V) {
 							return succes;
+						} else if (grille[colonne + 1][ligne - 1] == symboleJoueurCourant) {
+							return succes + 1;
 						} else {
 							return echec;
 						}
@@ -852,14 +921,25 @@ public class Grille {
 
 		// switch case pour est
 		switch (nbAlignes) {
+		case 1:
+			utilitePossible = trouverCellulesVidesAutourDe(colonneOriginale, ligneOriginale, Constantes.Directions.EST, symboleJoueurCourant);
+			if (utilitePossible == 1) {
+				utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
+				// Mettre l'utilité à minimum 1 pour le premier singleton
+				// dévouverte.
+				if (utilite < utilitePossible) {
+					utilite = utilitePossible;
+				}
+			}
+			break;
 		case 2:
 			utilitePossible = completerLaPaire(colonneOriginale, colonne, ligneOriginale, ligne, symboleJoueurCourant);
 			if (utilitePossible == 2) {
 				utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
 				// Mettre l'utilité à minimum 2 pour la première paire
 				// dévouverte.
-				if (utilite < 2) {
-					utilite = 2;
+				if (utilite < utilitePossible) {
+					utilite = utilitePossible;
 				}
 			}
 			break;
@@ -869,8 +949,8 @@ public class Grille {
 			if (utilitePossible == 3) {
 				utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
 				// Mettre utilité à minimum 3 pour le premier triplet découvert.
-				if (utilite < 3) {
-					utilite = 3;
+				if (utilite < utilitePossible) {
+					utilite = utilitePossible;
 				}
 			}
 			break;
@@ -894,6 +974,17 @@ public class Grille {
 
 		// switch case pour sud-est
 		switch (nbAlignes) {
+		case 1:
+			utilitePossible = trouverCellulesVidesAutourDe(colonneOriginale, ligneOriginale, Constantes.Directions.SUDEST, symboleJoueurCourant);
+			if (utilitePossible == 1) {
+				utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
+				// Mettre l'utilité à minimum 1 pour le premier singleton
+				// dévouverte.
+				if (utilite < utilitePossible) {
+					utilite = utilitePossible;
+				}
+			}
+			break;
 		case 2:
 			// Eliminer les cas où la paire se trouve dans une zone où on ne
 			// peut pas gagner.
@@ -904,8 +995,8 @@ public class Grille {
 					utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
 					// Mettre l'utilité à minimum 2 pour la première paire
 					// dévouverte.
-					if (utilite < 2) {
-						utilite = 2;
+					if (utilite < utilitePossible) {
+						utilite = utilitePossible;
 					}
 				}
 			}
@@ -920,8 +1011,8 @@ public class Grille {
 					utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
 					// Mettre l'utilité à minimum 3 pour le premier triplet
 					// découvert.
-					if (utilite < 3) {
-						utilite = 3;
+					if (utilite < utilitePossible) {
+						utilite = utilitePossible;
 					}
 				}
 			}
@@ -943,14 +1034,25 @@ public class Grille {
 
 		// switch case pour sud
 		switch (nbAlignes) {
+		case 1:
+			utilitePossible = trouverCellulesVidesAutourDe(colonneOriginale, ligneOriginale, Constantes.Directions.SUD, symboleJoueurCourant);
+			if (utilitePossible == 1) {
+				utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
+				// Mettre l'utilité à minimum 1 pour le premier singleton
+				// dévouverte.
+				if (utilite < utilitePossible) {
+					utilite = utilitePossible;
+				}
+			}
+			break;
 		case 2:
 			utilitePossible = completerLaPaire(colonneOriginale, colonne, ligneOriginale, ligne, symboleJoueurCourant);
 			if (utilitePossible == 2) {
 				utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
 				// Mettre l'utilité à minimum 2 pour la première paire
 				// dévouverte.
-				if (utilite < 2) {
-					utilite = 2;
+				if (utilite < utilitePossible) {
+					utilite = utilitePossible;
 				}
 			}
 			break;
@@ -961,8 +1063,8 @@ public class Grille {
 				utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
 				// Mettre l'utilité à minimum 3 pour le premier triplet
 				// découvert.
-				if (utilite < 3) {
-					utilite = 3;
+				if (utilite < utilitePossible) {
+					utilite = utilitePossible;
 				}
 			}
 			break;
@@ -987,17 +1089,14 @@ public class Grille {
 
 		// switch case pour sud-ouest
 		switch (nbAlignes) {
-		// C'est le seul cas où on s'intéresse à un seul symbole aligné. On est
-		// sûr que toutes les autres directions ont été explorés et donc que la
-		// case est vraiment seule.
 		case 1:
-			utilitePossible = trouverCellulesVidesAutourDe(colonneOriginale, ligneOriginale);
+			utilitePossible = trouverCellulesVidesAutourDe(colonneOriginale, ligneOriginale, Constantes.Directions.SUDOUEST, symboleJoueurCourant);
 			if (utilitePossible == 1) {
 				utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
-				// Mettre l'utilité à minimum 1 pour la première paire
+				// Mettre l'utilité à minimum 1 pour le premier singleton
 				// dévouverte.
-				if (utilite < 1) {
-					utilite = 1;
+				if (utilite < utilitePossible) {
+					utilite = utilitePossible;
 				}
 			}
 			break;
@@ -1009,8 +1108,8 @@ public class Grille {
 					utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
 					// Mettre l'utilité à minimum 2 pour la première paire
 					// dévouverte.
-					if (utilite < 2) {
-						utilite = 2;
+					if (utilite < utilitePossible) {
+						utilite = utilitePossible;
 					}
 				}
 			}
@@ -1023,8 +1122,8 @@ public class Grille {
 					utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
 					// Mettre l'utilité à minimum 2 pour le premier triplet
 					// dévouvert.
-					if (utilite < 3) {
-						utilite = 3;
+					if (utilite < utilitePossible) {
+						utilite = utilitePossible;
 					}
 				}
 			}

@@ -20,6 +20,7 @@ public class Jeu extends Thread{
 		console.lancementPartie(partie.getJoueur1(), partie.getJoueur2());
 		while(!partie.isPartieFinie())
 		{
+			System.out.println("Utilité de la grille pour " + partie.getJoueurCourant().getNom() + " : " + partie.getGrille().evaluer(partie.getJoueurCourant().getSymbole()));
 			console.lancementTour(partie.getTour(), partie.getJoueurCourant(), partie.getGrille());
 			
 			long tempsReflexion=System.currentTimeMillis();

@@ -13,7 +13,7 @@ public class AlphaBeta extends Algorithm {
 
 	@Override
 	public int choisirCoup() {
-		// À compléter
+		// A compl�ter
 		
 		return 0;
 	}

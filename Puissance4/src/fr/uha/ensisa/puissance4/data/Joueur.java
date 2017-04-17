@@ -27,7 +27,7 @@ public abstract class Joueur {
 	public abstract int getType();
 	
 	/**
-	 * Renvoie "Humain" ou "IA" Ã  des fins d'affichage
+	 * Renvoie "Humain" ou "IA" à des fins d'affichage
 	 * @return
 	 */
 	public abstract String getTypeNom();

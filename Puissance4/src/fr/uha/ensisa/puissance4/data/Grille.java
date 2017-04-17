@@ -1145,7 +1145,7 @@ public class Grille {
 		// Joueur 1 cherche à maximiser ses chances à gagner
 		// Joueur 2 cherche à minimiser les chances que max gagne
 
-		if (symboleJoueurCourant == Constantes.SYMBOLE_J1) {
+		if (symboleJoueurCourant == Constantes.SYMBOLE_J1 || symboleJoueurCourant.equals(Constantes.SYMBOLE_J2)) {
 			for (int ligne = 0; ligne < Constantes.NB_LIGNES; ligne++) {
 				for (int colonne = 0; colonne < Constantes.NB_COLONNES; colonne++) {
 					if (grille[colonne][ligne] == Constantes.SYMBOLE_J1) {
@@ -1153,11 +1153,10 @@ public class Grille {
 					}
 				}
 			}
-		} else {
-			if (symboleJoueurCourant.equals(Constantes.SYMBOLE_J2)) {
-
-			}
+			return utilite;
 		}
+		
+		// Erreur de symbole
 		return 0;
 	}
 
@@ -1168,5 +1167,4 @@ public class Grille {
 		Grille copy = new Grille(this);
 		return copy;
 	}
-
 }

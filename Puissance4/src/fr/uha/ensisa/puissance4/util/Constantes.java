@@ -1,6 +1,6 @@
 package fr.uha.ensisa.puissance4.util;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 
 public abstract class Constantes {
 	public static final int MODE_CONSOLE = 0;
@@ -55,60 +55,59 @@ public abstract class Constantes {
 	public static final int MAX = 1;
 	
 	/* Certaines cases sont problématiques conçernant l'analyse. On préfère les hôter au lieu de les parcourir. */
-	public static HashSet<Integer[]> pairesInutilesSE = coordonneesPairesInutilesSE();
-	public static HashSet<Integer[]> pairesInutilesSO = coordonneesPairesInutilesSO();
-	public static HashSet<Integer[]> tripletsInutilesSE = coordonneesTripletsInutilesSE();
-	public static HashSet<Integer[]> tripletsInutilesSO = coordonneesTripletsInutilesSO();
+	public static ArrayList<Coordonnees> pairesInutilesSE = coordonneesPairesInutilesSE();
+	public static ArrayList<Coordonnees> pairesInutilesSO = coordonneesPairesInutilesSO();
+	public static ArrayList<Coordonnees> tripletsInutilesSE = coordonneesTripletsInutilesSE();
+	public static ArrayList<Coordonnees> tripletsInutilesSO = coordonneesTripletsInutilesSO();
 	
-	private static HashSet<Integer[]> coordonneesPairesInutilesSE() {
-		pairesInutilesSE = new HashSet<Integer[]>();
-		pairesInutilesSE.add(new Integer[]{NB_COLONNES - 3, 0});
-		pairesInutilesSE.add(new Integer[]{NB_COLONNES - 2, 0});
-		pairesInutilesSE.add(new Integer[]{NB_COLONNES - 2, 1});
-		pairesInutilesSE.add(new Integer[]{NB_COLONNES - 1, 1});
-		pairesInutilesSE.add(new Integer[]{NB_COLONNES - 1, 2});
-		pairesInutilesSE.add(new Integer[]{0, NB_LIGNES - 3});
-		pairesInutilesSE.add(new Integer[]{0, NB_LIGNES - 2});
-		pairesInutilesSE.add(new Integer[]{1, NB_LIGNES - 2});
-		pairesInutilesSE.add(new Integer[]{1, NB_LIGNES - 1});
-		pairesInutilesSE.add(new Integer[]{2, NB_LIGNES - 1});
+	private static ArrayList<Coordonnees> coordonneesPairesInutilesSE() {
+		pairesInutilesSE = new ArrayList<Coordonnees>();
+		pairesInutilesSE.add(new Coordonnees(NB_COLONNES - 3, 0));
+		pairesInutilesSE.add(new Coordonnees(NB_COLONNES - 2, 0));
+		pairesInutilesSE.add(new Coordonnees(NB_COLONNES - 2, 1));
+		pairesInutilesSE.add(new Coordonnees(NB_COLONNES - 1, 1));
+		pairesInutilesSE.add(new Coordonnees(NB_COLONNES - 1, 2));
+		pairesInutilesSE.add(new Coordonnees(0, NB_LIGNES - 3));
+		pairesInutilesSE.add(new Coordonnees(0, NB_LIGNES - 2));
+		pairesInutilesSE.add(new Coordonnees(1, NB_LIGNES - 2));
+		pairesInutilesSE.add(new Coordonnees(1, NB_LIGNES - 1));
+		pairesInutilesSE.add(new Coordonnees(2, NB_LIGNES - 1));
 		return pairesInutilesSE;
 	}
 
-	private static HashSet<Integer[]> coordonneesPairesInutilesSO() {
-		pairesInutilesSO = new HashSet<Integer[]>();
-		pairesInutilesSO.add(new Integer[]{1, 0});
-		pairesInutilesSO.add(new Integer[]{2, 0});
-		pairesInutilesSO.add(new Integer[]{0, 1});
-		pairesInutilesSO.add(new Integer[]{1, 1});
-		pairesInutilesSO.add(new Integer[]{0, 2});
-		pairesInutilesSO.add(new Integer[]{NB_COLONNES - 1, NB_LIGNES - 3});
-		pairesInutilesSO.add(new Integer[]{NB_COLONNES - 1, NB_LIGNES - 2});
-		pairesInutilesSO.add(new Integer[]{NB_COLONNES - 2, NB_LIGNES - 2});
-		pairesInutilesSO.add(new Integer[]{NB_COLONNES - 2, NB_LIGNES - 1});
-		pairesInutilesSO.add(new Integer[]{NB_COLONNES - 3, NB_LIGNES - 1});
+	private static ArrayList<Coordonnees> coordonneesPairesInutilesSO() {
+		pairesInutilesSO = new ArrayList<Coordonnees>();
+		pairesInutilesSO.add(new Coordonnees(1, 0));
+		pairesInutilesSO.add(new Coordonnees(2, 0));
+		pairesInutilesSO.add(new Coordonnees(0, 1));
+		pairesInutilesSO.add(new Coordonnees(1, 1));
+		pairesInutilesSO.add(new Coordonnees(0, 2));
+		pairesInutilesSO.add(new Coordonnees(NB_COLONNES - 1, NB_LIGNES - 3));
+		pairesInutilesSO.add(new Coordonnees(NB_COLONNES - 1, NB_LIGNES - 2));
+		pairesInutilesSO.add(new Coordonnees(NB_COLONNES - 2, NB_LIGNES - 2));
+		pairesInutilesSO.add(new Coordonnees(NB_COLONNES - 2, NB_LIGNES - 1));
+		pairesInutilesSO.add(new Coordonnees(NB_COLONNES - 3, NB_LIGNES - 1));
 		return pairesInutilesSO;
 	}
 
-	private static HashSet<Integer[]> coordonneesTripletsInutilesSE() {
-		tripletsInutilesSE = new HashSet<Integer[]>();
-		tripletsInutilesSE.add(new Integer[]{NB_COLONNES - 3, 0});
-		tripletsInutilesSE.add(new Integer[]{NB_COLONNES - 2, 1});
-		tripletsInutilesSE.add(new Integer[]{NB_COLONNES - 1, 2});
-		tripletsInutilesSE.add(new Integer[]{0, NB_LIGNES - 3});
-		tripletsInutilesSE.add(new Integer[]{1, NB_LIGNES - 2});
-		tripletsInutilesSE.add(new Integer[]{2, NB_LIGNES - 1});
+	private static ArrayList<Coordonnees> coordonneesTripletsInutilesSE() {
+		tripletsInutilesSE = new ArrayList<Coordonnees>();
+		tripletsInutilesSE.add(new Coordonnees(NB_COLONNES - 3, 0));
+		tripletsInutilesSE.add(new Coordonnees(NB_COLONNES - 2, 1));
+		tripletsInutilesSE.add(new Coordonnees(NB_COLONNES - 1, 2));
+		tripletsInutilesSE.add(new Coordonnees(0, NB_LIGNES - 3));
+		tripletsInutilesSE.add(new Coordonnees(1, NB_LIGNES - 2));
 		return tripletsInutilesSE;
 	}
 	
-	private static HashSet<Integer[]> coordonneesTripletsInutilesSO() {
-		tripletsInutilesSO = new HashSet<Integer[]>();
-		tripletsInutilesSO.add(new Integer[]{2, 0});
-		tripletsInutilesSO.add(new Integer[]{1, 1});
-		tripletsInutilesSO.add(new Integer[]{0, 2});
-		tripletsInutilesSO.add(new Integer[]{NB_COLONNES - 1, NB_LIGNES - 3});
-		tripletsInutilesSO.add(new Integer[]{NB_COLONNES - 2, NB_LIGNES - 2});
-		tripletsInutilesSO.add(new Integer[]{NB_COLONNES - 3, NB_LIGNES - 1});
+	private static ArrayList<Coordonnees> coordonneesTripletsInutilesSO() {
+		tripletsInutilesSO = new ArrayList<Coordonnees>();
+		tripletsInutilesSO.add(new Coordonnees(2, 0));
+		tripletsInutilesSO.add(new Coordonnees(1, 1));
+		tripletsInutilesSO.add(new Coordonnees(0, 2));
+		tripletsInutilesSO.add(new Coordonnees(NB_COLONNES - 1, NB_LIGNES - 3));
+		tripletsInutilesSO.add(new Coordonnees(NB_COLONNES - 2, NB_LIGNES - 2));
+		tripletsInutilesSO.add(new Coordonnees(NB_COLONNES - 3, NB_LIGNES - 1));
 		return tripletsInutilesSO;
 	}
 	

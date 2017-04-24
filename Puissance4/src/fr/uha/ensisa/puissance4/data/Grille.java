@@ -4,6 +4,7 @@ import java.util.HashSet;
 
 import fr.uha.ensisa.puissance4.util.Constantes;
 import fr.uha.ensisa.puissance4.util.Constantes.Case;
+import fr.uha.ensisa.puissance4.util.Coordonnees;
 
 public class Grille {
 
@@ -528,6 +529,10 @@ public class Grille {
 					// sûr d'avoir assez de cases à analyser puisque elles sont
 					// filtrées en amont (cf determinerTypeDeCluster()). On doit
 					// descendre vers le sud-est.
+					System.out.println("ColonneOriginale : " + colonneOriginale);
+					System.out.println("LigneOriginale : " + ligneOriginale);
+					System.out.println("Ligne : " + ligne);
+					System.out.println("Colonne : " + colonne);
 					if (grille[colonne][ligne] == Constantes.Case.V) {
 						if (grille[colonne + 1][ligne + 1] == Constantes.Case.V) {
 							return succes;
@@ -988,7 +993,8 @@ public class Grille {
 		case 2:
 			// Eliminer les cas où la paire se trouve dans une zone où on ne
 			// peut pas gagner.
-			if (!Constantes.pairesInutilesSE.contains(new Integer[] { colonneOriginale, ligneOriginale })) {
+			Coordonnees coordSE2 = new Coordonnees(colonneOriginale, ligneOriginale);
+			if (!Constantes.pairesInutilesSE.contains(coordSE2)) {
 				utilitePossible = completerLaPaire(colonneOriginale, colonne, ligneOriginale, ligne,
 						symboleJoueurCourant);
 				if (utilitePossible == 2) {
@@ -1004,7 +1010,8 @@ public class Grille {
 		case 3:
 			// Eliminer les cas où le triplet se trouve dans une zone où on ne
 			// peut pas gagner.
-			if (!Constantes.tripletsInutilesSE.contains(new Integer[] { colonneOriginale, ligneOriginale })) {
+			Coordonnees coordSE3 = new Coordonnees(colonneOriginale, ligneOriginale);
+			if (!Constantes.tripletsInutilesSE.contains(coordSE3)) {
 				utilitePossible = completerLeTriplet(colonneOriginale, colonne, ligneOriginale, ligne,
 						symboleJoueurCourant);
 				if (utilitePossible == 3) {
@@ -1101,7 +1108,8 @@ public class Grille {
 			}
 			break;
 		case 2:
-			if (!Constantes.pairesInutilesSO.contains(new Integer[] { colonneOriginale, ligneOriginale })) {
+			Coordonnees coordSO2 = new Coordonnees(colonneOriginale, ligneOriginale);
+			if (!Constantes.pairesInutilesSO.contains(coordSO2)) {
 				utilitePossible = completerLaPaire(colonneOriginale, colonne, ligneOriginale, ligne,
 						symboleJoueurCourant);
 				if (utilitePossible == 2) {
@@ -1115,7 +1123,8 @@ public class Grille {
 			}
 			break;
 		case 3:
-			if (!Constantes.tripletsInutilesSO.contains(new Integer[] { colonneOriginale, ligneOriginale })) {
+			Coordonnees coordSO3 = new Coordonnees(colonneOriginale, ligneOriginale);
+			if (!Constantes.tripletsInutilesSO.contains(coordSO3)) {
 				utilitePossible = completerLaPaire(colonneOriginale, colonne, ligneOriginale, ligne,
 						symboleJoueurCourant);
 				if (utilitePossible == 3) {
@@ -1146,10 +1155,20 @@ public class Grille {
 		// Joueur 2 cherche à minimiser les chances que max gagne
 
 		if (symboleJoueurCourant == Constantes.SYMBOLE_J1 || symboleJoueurCourant.equals(Constantes.SYMBOLE_J2)) {
-			for (int ligne = 0; ligne < Constantes.NB_LIGNES; ligne++) {
-				for (int colonne = 0; colonne < Constantes.NB_COLONNES; colonne++) {
-					if (grille[colonne][ligne] == Constantes.SYMBOLE_J1) {
-						determinerTypeDeCluster(colonne, ligne, Constantes.SYMBOLE_J1);
+			if(symboleJoueurCourant == Constantes.SYMBOLE_J1) {
+				for (int ligne = 0; ligne < Constantes.NB_LIGNES; ligne++) {
+					for (int colonne = 0; colonne < Constantes.NB_COLONNES; colonne++) {
+						if (grille[colonne][ligne] == Constantes.SYMBOLE_J1) {
+							determinerTypeDeCluster(colonne, ligne, Constantes.SYMBOLE_J1);
+						}
+					}
+				}
+			} else {
+				for (int ligne = 0; ligne < Constantes.NB_LIGNES; ligne++) {
+					for (int colonne = 0; colonne < Constantes.NB_COLONNES; colonne++) {
+						if (grille[colonne][ligne] == Constantes.SYMBOLE_J2) {
+							determinerTypeDeCluster(colonne, ligne, Constantes.SYMBOLE_J2);
+						}
 					}
 				}
 			}
@@ -1166,5 +1185,9 @@ public class Grille {
 	public Grille clone() {
 		Grille copy = new Grille(this);
 		return copy;
+	}
+
+	public Case[][] getMatrice() {
+		return grille;
 	}
 }

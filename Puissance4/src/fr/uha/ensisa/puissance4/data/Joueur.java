@@ -51,7 +51,7 @@ public abstract class Joueur {
 	}
 	
 	/**
-	 * Renvoie le symbole utilisÃ© par le joueur (X ou O)
+	 * Renvoie le symbole utilisé par le joueur (X ou O)
 	 * @return Case symbole
 	 */
 	public Case getSymbole()

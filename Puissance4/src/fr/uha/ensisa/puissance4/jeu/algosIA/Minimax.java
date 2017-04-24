@@ -25,17 +25,16 @@ public class Minimax extends Algorithm {
 		Noeud racine = new Noeud(grilleDepart.clone(), symboleMax);
 		Noeud explorateur = null;
 		FIFO noeudsExplorables = new FIFO();
-		noeudsExplorables.push(racine);
 		HashMap<Grille, Integer> grillesJouables = null;
 		explorateur = racine;
 		
 		while(explorateur != null) {
 			if(explorateur.getProfondeur() % 2 == 0) {
 				grillesJouables = FabriqueDeGrille.genererGrilles(explorateur.getEtat(), symboleMax);
-				explorateur.genererEnfants(grillesJouables);
+				explorateur.genererEnfants(grillesJouables, symboleMax);
 			} else {
 				grillesJouables = FabriqueDeGrille.genererGrilles(explorateur.getEtat(), symboleMin);
-				explorateur.genererEnfants(grillesJouables);
+				explorateur.genererEnfants(grillesJouables, symboleMax);
 			}
 			
 			if(explorateur.getProfondeur() < this.levelIA - 1) {
@@ -43,14 +42,14 @@ public class Minimax extends Algorithm {
 			} else {
 				for(Noeud enfant : explorateur.getEnfants()) {
 					enfant.setRole(Noeud.Roles.TERMINAL);
-					System.out.println("Nouveau noeud terminal.");
 				}
 			}
 			explorateur = noeudsExplorables.pop();
 		}
 		
-		double utilite = racine.utilite();
-		System.out.println("Utilité du prochain coup : " + utilite);
+		// Recherche du meilleur coup
+		double utilite = racine.minimax();
+		
 		for(Noeud noeud : racine.getEnfants()) {
 			if(utilite == noeud.getUtilite()) {
 				return noeud.getColonneJoue();

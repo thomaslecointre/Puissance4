@@ -25,7 +25,13 @@ public class Grille {
 	 * @param original
 	 */
 	private Grille(Grille original) {
-		this.grille = original.grille;
+		this.grille = new Case[Constantes.NB_COLONNES][Constantes.NB_LIGNES];
+		for (int i = 0; i < Constantes.NB_COLONNES; i++) {
+			for (int j = 0; j < Constantes.NB_LIGNES; j++) {
+				this.grille[i][j] = original.grille[i][j];
+			}
+		}
+
 		this.utilite = original.utilite;
 	}
 
@@ -220,8 +226,8 @@ public class Grille {
 	 *            l'indice ligne de la case de départ.
 	 * @return Un entier indiquant l'utilité de la case analysée.
 	 */
-	private int trouverCellulesVidesAutourDe(int colonneOriginale, int ligneOriginale,
-			Constantes.Directions direction, Constantes.Case symboleJoueurCourant) {
+	private int trouverCellulesVidesAutourDe(int colonneOriginale, int ligneOriginale, Constantes.Directions direction,
+			Constantes.Case symboleJoueurCourant) {
 
 		int succes = 1;
 		int echec = 0;
@@ -259,7 +265,9 @@ public class Grille {
 
 		for (Integer[] voisin : pairesAValider) {
 			try {
-				// Comme l'alignement détérminé précedemment est de 1, on cherche seulement les cases vides autour selon la direction fournie.
+				// Comme l'alignement détérminé précedemment est de 1, on
+				// cherche seulement les cases vides autour selon la direction
+				// fournie.
 				if (grille[voisin[0]][voisin[1]] == Constantes.Case.V) {
 					tripletsAValider.add(trouverLaDirection(colonneOriginale, ligneOriginale, voisin[0], voisin[1]));
 				}
@@ -273,10 +281,11 @@ public class Grille {
 		} else {
 			for (Integer[] paire : tripletsAValider) {
 				try {
-					if (grille[paire[0]][paire[1]] == Constantes.Case.V || grille[paire[0]][paire[1]] == symboleJoueurCourant) {
+					if (grille[paire[0]][paire[1]] == Constantes.Case.V
+							|| grille[paire[0]][paire[1]] == symboleJoueurCourant) {
 						quadrupletsAValider
 								.add(trouverLaDirection(colonneOriginale, ligneOriginale, paire[0], paire[1]));
-						if(grille[paire[0]][paire[1]] == symboleJoueurCourant) {
+						if (grille[paire[0]][paire[1]] == symboleJoueurCourant) {
 							nbCasesSymboleJoueur++;
 						}
 					}
@@ -291,8 +300,9 @@ public class Grille {
 		} else {
 			for (Integer[] triplet : quadrupletsAValider) {
 				try {
-					if (grille[triplet[0]][triplet[1]] == Constantes.Case.V || grille[triplet[0]][triplet[1]] == symboleJoueurCourant) {
-						if(grille[triplet[0]][triplet[1]] == symboleJoueurCourant) {
+					if (grille[triplet[0]][triplet[1]] == Constantes.Case.V
+							|| grille[triplet[0]][triplet[1]] == symboleJoueurCourant) {
+						if (grille[triplet[0]][triplet[1]] == symboleJoueurCourant) {
 							nbCasesSymboleJoueur++;
 						}
 						return succes + nbCasesSymboleJoueur;
@@ -529,10 +539,6 @@ public class Grille {
 					// sûr d'avoir assez de cases à analyser puisque elles sont
 					// filtrées en amont (cf determinerTypeDeCluster()). On doit
 					// descendre vers le sud-est.
-					System.out.println("ColonneOriginale : " + colonneOriginale);
-					System.out.println("LigneOriginale : " + ligneOriginale);
-					System.out.println("Ligne : " + ligne);
-					System.out.println("Colonne : " + colonne);
 					if (grille[colonne][ligne] == Constantes.Case.V) {
 						if (grille[colonne + 1][ligne + 1] == Constantes.Case.V) {
 							return succes;
@@ -844,11 +850,11 @@ public class Grille {
 		// Direction sud
 		if (colonneOriginale == colonne) {
 			if (ligneOriginale > 0) {
-				if (grille[ligneOriginale - 1][colonneOriginale] == Constantes.Case.V) {
+				if (grille[colonneOriginale][ligneOriginale - 1] == Constantes.Case.V) {
 					return succes;
 				} else {
 					if (ligne < Constantes.NB_LIGNES) {
-						if (grille[ligne][colonne] == Constantes.Case.V) {
+						if (grille[colonne][ligne] == Constantes.Case.V) {
 							return succes;
 						} else {
 							return echec;
@@ -927,7 +933,8 @@ public class Grille {
 		// switch case pour est
 		switch (nbAlignes) {
 		case 1:
-			utilitePossible = trouverCellulesVidesAutourDe(colonneOriginale, ligneOriginale, Constantes.Directions.EST, symboleJoueurCourant);
+			utilitePossible = trouverCellulesVidesAutourDe(colonneOriginale, ligneOriginale, Constantes.Directions.EST,
+					symboleJoueurCourant);
 			if (utilitePossible == 1) {
 				utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
 				// Mettre l'utilité à minimum 1 pour le premier singleton
@@ -980,7 +987,8 @@ public class Grille {
 		// switch case pour sud-est
 		switch (nbAlignes) {
 		case 1:
-			utilitePossible = trouverCellulesVidesAutourDe(colonneOriginale, ligneOriginale, Constantes.Directions.SUDEST, symboleJoueurCourant);
+			utilitePossible = trouverCellulesVidesAutourDe(colonneOriginale, ligneOriginale,
+					Constantes.Directions.SUDEST, symboleJoueurCourant);
 			if (utilitePossible == 1) {
 				utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
 				// Mettre l'utilité à minimum 1 pour le premier singleton
@@ -1042,7 +1050,8 @@ public class Grille {
 		// switch case pour sud
 		switch (nbAlignes) {
 		case 1:
-			utilitePossible = trouverCellulesVidesAutourDe(colonneOriginale, ligneOriginale, Constantes.Directions.SUD, symboleJoueurCourant);
+			utilitePossible = trouverCellulesVidesAutourDe(colonneOriginale, ligneOriginale, Constantes.Directions.SUD,
+					symboleJoueurCourant);
 			if (utilitePossible == 1) {
 				utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
 				// Mettre l'utilité à minimum 1 pour le premier singleton
@@ -1097,7 +1106,8 @@ public class Grille {
 		// switch case pour sud-ouest
 		switch (nbAlignes) {
 		case 1:
-			utilitePossible = trouverCellulesVidesAutourDe(colonneOriginale, ligneOriginale, Constantes.Directions.SUDOUEST, symboleJoueurCourant);
+			utilitePossible = trouverCellulesVidesAutourDe(colonneOriginale, ligneOriginale,
+					Constantes.Directions.SUDOUEST, symboleJoueurCourant);
 			if (utilitePossible == 1) {
 				utilite += (double) utilitePossible / (double) Constantes.NB_TOUR_MAX;
 				// Mettre l'utilité à minimum 1 pour le premier singleton
@@ -1155,7 +1165,7 @@ public class Grille {
 		// Joueur 2 cherche à minimiser les chances que max gagne
 
 		if (symboleJoueurCourant == Constantes.SYMBOLE_J1 || symboleJoueurCourant.equals(Constantes.SYMBOLE_J2)) {
-			if(symboleJoueurCourant == Constantes.SYMBOLE_J1) {
+			if (symboleJoueurCourant == Constantes.SYMBOLE_J1) {
 				for (int ligne = 0; ligne < Constantes.NB_LIGNES; ligne++) {
 					for (int colonne = 0; colonne < Constantes.NB_COLONNES; colonne++) {
 						if (grille[colonne][ligne] == Constantes.SYMBOLE_J1) {
@@ -1174,7 +1184,7 @@ public class Grille {
 			}
 			return utilite;
 		}
-		
+
 		// Erreur de symbole
 		return 0;
 	}

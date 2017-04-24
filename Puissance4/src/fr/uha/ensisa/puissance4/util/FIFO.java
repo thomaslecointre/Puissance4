@@ -1,6 +1,6 @@
 package fr.uha.ensisa.puissance4.util;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class FIFO extends LinkedList<Noeud> {
@@ -34,7 +34,7 @@ public class FIFO extends LinkedList<Noeud> {
 	 * Ajoute tous les éléments de la collection à la liste, conformément à la description de push().
 	 * @param enfants les éléments à ajouter.
 	 */
-	public void push(HashSet<Noeud> enfants) {
+	public void push(ArrayList<Noeud> enfants) {
 		for(Noeud noeud : enfants) {
 			push(noeud);
 		}

@@ -15,14 +15,6 @@ public abstract class Puissance4 {
 			console.start();
 			break;
 		}
-
-		/*
-		 * Grille grille = new Grille();
-		 * 
-		 * for (int ligne = 0; ligne < Constantes.NB_LIGNES; ligne++) { for (int
-		 * colonne = 0; colonne < Constantes.NB_COLONNES; colonne++) {
-		 * grille.getMatrice()[colonne][ligne] = Constantes.Case.X; } }
-		 */
 	}
 
 }
